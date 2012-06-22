@@ -1,0 +1,338 @@
+package kf.jms.soap.bean.fulfilmentsource;
+
+import java.rmi.RemoteException;
+
+
+import kf.core.logging.Logger;
+import kf.jms.soap.bean.AbstractCanonicalBean;
+
+import org.apache.axis2.AxisFault;
+import org.apache.xmlbeans.GDuration;
+import org.openapplications.www.oagis._9.ApplicationAreaType;
+import org.openapplications.www.oagis._9.CodesType;
+import org.openapplications.www.oagis._9.SyncType;
+import org.openapplications.www.oagis._9.TextType;
+import org.openapplications.www.oagis._9.TimePeriodType;
+import org.openapplications.www.oagis._9.unqualifieddatatypes._1_1.CodeType;
+
+import com.kingfisher.www.oagis._9.BrandChannelType;
+import com.kingfisher.www.oagis._9.BrandType;
+import com.kingfisher.www.oagis._9.ChannelType;
+import com.kingfisher.www.oagis._9.FulfilmentSourceHeaderType;
+import com.kingfisher.www.oagis._9.FulfilmentSourceLineType;
+import com.kingfisher.www.oagis._9.FulfilmentSourceType;
+import com.kingfisher.www.oagis._9.ShippingMethodType;
+import com.kingfisher.www.oagis._9.SynchroniseFulfilmentSourceDataAreaType;
+import com.kingfisher.www.oagis._9.SynchroniseFulfilmentSourceDocument;
+import com.kingfisher.www.oagis._9.SynchroniseFulfilmentSourceType;
+import com.kingfisher.www.services.fulfilmentsourceservice._1_0.SynchroniseFulfilmentSourceStub;
+
+
+
+
+
+public class ShippingMethodBean extends AbstractCanonicalBean {
+	private static final SynchroniseFulfilmentSourceDocument fulfilmentSourceDocument = SynchroniseFulfilmentSourceDocument.Factory
+    .newInstance();
+	private ShippingMethodType shippingMethodArea;
+	
+	protected ShippingMethodBean(final String brandValue, final String channelValue) {
+        super();
+        createSkeleton();
+        setBrand(brandValue);
+        setChannel(channelValue, 0);
+        
+	}
+	
+		
+	
+	//SynchroniseFulfilmentSource
+	protected SynchroniseFulfilmentSourceType initSynchroniseFulfilmentSource() {
+        SynchroniseFulfilmentSourceType synchroniseFulfilmentSourceType = fulfilmentSourceDocument
+                .getSynchroniseFulfilmentSource();
+        if(synchroniseFulfilmentSourceType == null) {
+            synchroniseFulfilmentSourceType = fulfilmentSourceDocument.addNewSynchroniseFulfilmentSource();
+        }
+        return synchroniseFulfilmentSourceType;
+        
+        
+    }
+	
+	
+	
+	//ApplicationArea
+	protected ApplicationAreaType initApplicationAreaType() {
+        ApplicationAreaType applicationAreaType = initSynchroniseFulfilmentSource().getApplicationArea();
+        if(applicationAreaType == null) {
+            applicationAreaType = initSynchroniseFulfilmentSource().addNewApplicationArea();
+        }
+        return applicationAreaType;
+    }
+	
+	
+	
+	//DataArea
+	protected SynchroniseFulfilmentSourceDataAreaType initDataAreaType() {
+		SynchroniseFulfilmentSourceDataAreaType dataAreaType = initSynchroniseFulfilmentSource().getDataArea();
+        if(dataAreaType == null) {
+            dataAreaType = initSynchroniseFulfilmentSource().addNewDataArea();
+        }
+        return dataAreaType;
+    }
+	
+	
+	
+    //Synchronise
+    protected SyncType initSynchroniseArea() {
+    	SynchroniseFulfilmentSourceDataAreaType dataArea = initDataAreaType();
+    	SyncType syncArea = dataArea.getSynchronise(); //getSynchronise();
+        if(syncArea == null) {
+            syncArea = dataArea.addNewSynchronise();
+        }
+        return syncArea;
+    }
+
+    
+    
+    //FulfilmentSource
+    protected FulfilmentSourceType getFulfilmentSourceAreaLast() {
+    	SynchroniseFulfilmentSourceDataAreaType dataArea = initDataAreaType();
+        FulfilmentSourceType[] fulfilmentArray = dataArea.getFulfilmentSourceArray();
+        return initFulfilmentSourceArea(fulfilmentArray.length == 0 ? 0 : fulfilmentArray.length - 1);
+    }
+
+    protected FulfilmentSourceType addNewFulfilmentSourceArea() {
+    	SynchroniseFulfilmentSourceDataAreaType dataArea = initDataAreaType();
+        return dataArea.addNewFulfilmentSource();
+    }
+
+    protected FulfilmentSourceType initFulfilmentSourceArea(final int position) {
+    	SynchroniseFulfilmentSourceDataAreaType dataArea = initDataAreaType();
+        FulfilmentSourceType[] fulfilmentArray = dataArea.getFulfilmentSourceArray();
+        FulfilmentSourceType fulfilmentArea = null;
+        if(fulfilmentArray.length > position) {
+        	fulfilmentArea = dataArea.getFulfilmentSourceArray(position);
+        }
+        else {
+        	fulfilmentArea = dataArea.addNewFulfilmentSource();
+        }
+        return fulfilmentArea;
+    }
+	
+    
+    
+	//FulfilmentSourceHeader
+    protected FulfilmentSourceHeaderType initFulfilmentSourceHeaderArea() {
+    	FulfilmentSourceType fulfilmentArea = initFulfilmentSourceArea(0);
+    	FulfilmentSourceHeaderType headerArea = fulfilmentArea.getFulfilmentSourceHeader();
+        if(headerArea == null) {
+        	headerArea = fulfilmentArea.addNewFulfilmentSourceHeader();
+        }
+        return headerArea;
+    }
+    
+  
+    
+    //BrandChannel
+    protected BrandChannelType initBrandChannelArea() {
+    	FulfilmentSourceHeaderType headerArea = initFulfilmentSourceHeaderArea();
+    	BrandChannelType brandChannelArea = headerArea.getBrandChannel();
+        if(brandChannelArea == null) {
+        	brandChannelArea = headerArea.addNewBrandChannel();
+        }
+        return brandChannelArea;
+    }
+    
+    
+    
+    //Brand
+	private void setBrand(final String brandValue) {
+        BrandType brand = initBrandChannelArea().addNewBrand();
+        attributeProcessor.build(brandValue);
+        if(attributeProcessor.hasAttribute("name")) {
+        	brand.addNewCode().setName(attributeProcessor.getAttribute("name"));
+        }
+        brand.getCode().setStringValue(attributeProcessor.getStringValue());
+	}
+	
+	
+	
+	//Channel	
+	protected ChannelType getChannelAreaLast() {
+    	BrandChannelType brandChannelArea = initBrandChannelArea();
+    	ChannelType[] channelArray = brandChannelArea.getChannelArray();
+        return initChannelArea(channelArray.length == 0 ? 0 : channelArray.length - 1);
+    }
+
+    protected ChannelType initChannelArea(final int position) {
+    	BrandChannelType brandChannelArea = initBrandChannelArea();
+    	ChannelType[] channelArray = brandChannelArea.getChannelArray();
+    	ChannelType channelArea = null;
+        if(channelArray.length > position) {
+        	channelArea = brandChannelArea.getChannelArray(position);
+        }
+        else {
+        	channelArea = brandChannelArea.addNewChannel();
+        }
+        return channelArea;
+    }
+    
+	protected void setChannel(final String channelValue, int position) {
+        ChannelType channel = initBrandChannelArea().addNewChannel();
+        attributeProcessor.build(channelValue);
+        if(attributeProcessor.hasAttribute("name")) {
+        	channel.addNewCode().setName(attributeProcessor.getAttribute("name"));
+        }
+        channel.getCode().setStringValue(attributeProcessor.getStringValue());
+	}
+    	
+	
+	
+    //FulfilmentSourceLine
+	protected FulfilmentSourceLineType getFulfilmentSourceLineAreaLast() {
+    	FulfilmentSourceType fulfilmentArea = initFulfilmentSourceArea(0);
+        FulfilmentSourceLineType[] fulfilmentLineArray = fulfilmentArea.getFulfilmentSourceLineArray();
+        return initFulfilmentSourceLineArea(fulfilmentLineArray.length == 0 ? 0 : fulfilmentLineArray.length - 1);
+    }
+
+    protected FulfilmentSourceLineType addNewFulfilmentSourceLineArea() {
+    	FulfilmentSourceType fulfilmentArea = initFulfilmentSourceArea(0);
+        return fulfilmentArea.addNewFulfilmentSourceLine();
+    }
+
+    protected FulfilmentSourceLineType initFulfilmentSourceLineArea(final int position) {
+    	FulfilmentSourceType fulfilmentArea = initFulfilmentSourceArea(0);
+        FulfilmentSourceLineType[] fulfilmentLineArray = fulfilmentArea.getFulfilmentSourceLineArray();
+        FulfilmentSourceLineType fulfilmentLineArea = null;
+        if(fulfilmentLineArray.length > position) {
+        	fulfilmentLineArea = fulfilmentArea.getFulfilmentSourceLineArray(position);
+        }
+        else {
+        	fulfilmentLineArea = fulfilmentArea.addNewFulfilmentSourceLine();
+        }
+        return fulfilmentLineArea;
+    }
+    
+    
+    //ShippingMethod
+    public ShippingMethodType addNewShippingMethodArea() {
+    	FulfilmentSourceLineType fulfilmentLineAreaLast = getFulfilmentSourceLineAreaLast();
+        return(this.shippingMethodArea = fulfilmentLineAreaLast.addNewShippingMethod());
+    }
+
+    public ShippingMethodType getShippingMethodArea() {
+        if(this.shippingMethodArea == null) {
+            throw new java.lang.IllegalStateException("Shipping Method area is not defined. ");
+        }
+        return this.shippingMethodArea;
+    }
+    
+
+	
+	//ShipmentServiceLevelCode
+    public void setShipmentServiceLevelCode(final String shipmentServiceLevelCodeValue) {
+    	final CodeType serviceLevelCode = getShippingMethodArea().addNewShipmentServiceLevelCode();
+    	serviceLevelCode.setStringValue(shipmentServiceLevelCodeValue);
+    }
+          
+    
+    
+	//Title
+    public void setTitle(final String titleValue) {
+    	final TextType title = getShippingMethodArea().addNewTitle();
+    	title.setStringValue(titleValue);
+    }
+	
+    
+    
+    //ShortMessage
+    public void setShortMessage(final String shortMessageValue) {
+    	final TextType message = getShippingMethodArea().addNewShortMessage();
+    	message.setStringValue(shortMessageValue);
+    }
+    
+    
+    //LongMessage
+    public void setLongMessage(final String longMessageValue) {
+    	final TextType message = getShippingMethodArea().addNewLongMessage();
+    	message.setStringValue(longMessageValue);
+    }
+    
+    
+    //InformationalMessage
+    public void setInformationalMessage(final String informationalMessageValue) {
+    	final TextType message = getShippingMethodArea().addNewInformationalMessage();
+    	message.setStringValue(informationalMessageValue);
+    }
+    
+    
+    //BookingMessage
+    public void setBookingMessage(final String bookingMessageValue) {
+    	final TextType message = getShippingMethodArea().addNewBookingMessage();
+    	message.setStringValue(bookingMessageValue);
+    }
+    
+    
+    
+    //CategoryCodes
+    protected CodesType initCategoryCodesArea() {
+    	ShippingMethodType shippingMethodArea = getShippingMethodArea();
+    	CodesType categoryCodesArea = shippingMethodArea.getCategoryCodes();
+        if(categoryCodesArea == null) {
+        	categoryCodesArea = shippingMethodArea.addNewCategoryCodes();
+        }
+        return categoryCodesArea;
+    }
+    
+    public void setCategoryCode(final String categoryCodeValue) {
+    	final CodeType code = initCategoryCodesArea().getCodeArray(0);
+    	code.setStringValue(categoryCodeValue);
+    }
+    
+    //ScheduledTimePeriod
+    protected TimePeriodType initScheduledTimePeriodArea() {
+    	ShippingMethodType shippingMethodArea = getShippingMethodArea();
+    	TimePeriodType timePeriodArea = shippingMethodArea.getScheduledTimePeriod();
+        if(timePeriodArea == null) {
+        	timePeriodArea = shippingMethodArea.addNewScheduledTimePeriod();
+        }
+        return timePeriodArea;
+    }
+    
+    public void setDuration(final String durationValue) {    	
+    	initScheduledTimePeriodArea().setDuration(new GDuration(durationValue));    	
+    }
+  
+	
+	private void createSkeleton() {
+        initApplicationAreaType();
+        initSynchroniseArea();
+        initFulfilmentSourceArea(0);
+        initFulfilmentSourceHeaderArea();
+        initFulfilmentSourceLineArea(0);
+        
+    }
+	
+	@Override
+	protected void processBean() {
+	    try {
+	    	Logger.out.debug(fulfilmentSourceDocument);
+	    	new SynchroniseFulfilmentSourceStub(getAxisConfigurationContext())
+	                .synchroniseFulfilmentSource(fulfilmentSourceDocument);
+	    }
+	    catch(AxisFault e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
+	    }
+	    catch(RemoteException e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
+	    } 
+	}
+
+	@Override
+	protected void clearBean() {
+		fulfilmentSourceDocument.getSynchroniseFulfilmentSource().setNil();
+	}
+}
+
